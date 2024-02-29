@@ -1,0 +1,141 @@
+<!-- Author:  Shawn Nasseri                          -->
+<!-- Project: Joes Hotdog                            -->
+<!-- Date:    Feb 28, 2024                           -->
+<!-- Description  part 3 to 5                        -->
+<!-- Fast food order entry DGMD E-28                 -->
+<!-- Order limited items from menu                   -->
+<!-- Program gets item and totals up order.          -->
+<!-- Input box to search and find item to add to cart-->
+<!-- Dropdown list to show items and add to cart with-->
+<!-- Quantity addes as extra way to order            -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Joe's Hotdogs</title>
+    <script>
+
+        const pricesArray = { 'hotdogs': 4.00, 'fries': 3.50, 'soda': 1.50, 'sauerkraut': 1.00 };
+
+        const menuJSON = '{"hotdogs": 4.00, "fries": 3.50, "soda": 1.50, "sauerkraut": 1.00}';
+
+        function MenuItem(name, price) {
+            this.name = name;
+            this.price = price;
+        }
+
+        const menuItems = [
+            new MenuItem('hotdogs', 4.00),
+            new MenuItem('fries', 3.50),
+            new MenuItem('soda', 1.50),
+            new MenuItem('sauerkraut', 1.00)
+        ];
+
+        // Display a menu  
+
+        function displayMenuFromJSON() {
+            const menuObj = JSON.parse(menuJSON);
+            const menuDiv = document.getElementById('menuJSON');
+            menuDiv.innerHTML = '<h2>Menu (JSON)</h2>';
+            for (const item in menuObj) {
+                menuDiv.innerHTML += `<p>${item}: $${menuObj[item]}</p>`;
+            }
+        }
+
+        function displayMenuFromObjects() {
+            const menuDiv = document.getElementById('menuObjects');
+            menuDiv.innerHTML = '<h2>Menu (Objects)</h2>';
+            menuItems.forEach(item => {
+                menuDiv.innerHTML += `<p>${item.name}: $${item.price}</p>`;
+            });
+        }
+
+        const shoppingCart = [];
+
+        function addToCart(itemName, quantity) {
+            const itemPrice = pricesArray[itemName];
+            const cartItem = { name: itemName, quantity: quantity, totalPrice: itemPrice * quantity };
+            shoppingCart.push(cartItem);
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const cartDiv = document.getElementById('shoppingCart');
+            cartDiv.innerHTML = '<h2>Shopping Cart</h2>';
+            shoppingCart.forEach(item => {
+                cartDiv.innerHTML += `<p>${item.quantity} x ${item.name}: $${item.totalPrice}</p>`;
+            });
+        }
+
+        function checkout() {
+            let totalOrderCost = 0;
+            let orderSummary = 'Thank you for your order:\n';
+            shoppingCart.forEach(item => {
+                totalOrderCost += item.totalPrice;
+                orderSummary += `${item.quantity} x ${item.name}: $${item.totalPrice}\n`;
+            });
+            orderSummary += `Total Cost: $${totalOrderCost}`;
+
+            alert(orderSummary);
+
+            shoppingCart.length = 0;
+            updateCartDisplay();
+
+            document.getElementById('itemQuantity').value = 1;
+        }
+        window.onload = function () {
+            displayMenuFromJSON();
+            displayMenuFromObjects();
+            generateItemSelection();
+        };
+
+        function generateItemSelection() {
+            const itemSelectionDiv = document.getElementById('itemName');
+            let selectHTML = '<select id="itemSelect">';
+            menuItems.forEach(item => {
+                selectHTML += `<option value="${item.name}">${item.name}</option>`;
+            });
+            selectHTML += '</select>';
+            selectHTML += 'Quantity: <input type="number" id="itemQuantity" value="1" min="1">';
+            itemSelectionDiv.innerHTML = selectHTML;
+        }
+
+        function addItemToCart() {
+            const selectedItem = document.getElementById('itemSelect').value;
+            const quantity = parseInt(document.getElementById('itemQuantity').value, 10);
+            addToCart(selectedItem, quantity);
+        }
+
+        function addItemToCartByTextInput() {
+            const itemNameInput = document.getElementById('itemNameInput').value.trim();
+            if (pricesArray.hasOwnProperty(itemNameInput)) {
+                addToCart(itemNameInput, 1);
+            } else {
+                alert("NOT FOUND");
+            }
+        }
+
+    </script>
+</head>
+
+<body>
+    <div id="menuJSON"></div>
+    <div id="menuObjects"></div>
+    <div id="itemInput">
+        Item Name: <input type="text" id="itemNameInput" placeholder="Enter item to search">
+        <button onclick="addItemToCartByTextInput()">Add To Cart Via Search</button>
+    </div>
+    <div id="itemName">Item Name</div>
+    <div id="shoppingCart">Shopping Cart</div>
+    <div id="btnAddToCart">Add To Cart Via List</div>
+
+    <script>
+        const btnAddToCart = document.getElementById('btnAddToCart');
+        btnAddToCart.innerHTML = '<button onclick="addItemToCart()">Add To Cart Via Dropdown List</button>';
+        btnAddToCart.innerHTML += '<button onclick="checkout()">Checkout</button>';
+    </script>
+</body>
+
+</html>
