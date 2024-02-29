@@ -1,0 +1,69 @@
+<!-- Author:  Shawn Nasseri                          -->
+<!-- Project: Joes Hotdog                            -->
+<!-- Date:    Feb 28, 2024                           -->
+<!-- Description  part 1 and 2                       -->
+<!-- Fast food order entry DGMD E-28                 -->
+<!-- Order limited items from menu                   -->
+<!-- Program gets item and totals up order.          -->
+<!-- Input box to search and find item to add to cart-->
+<!-- Dropdown list to show items and add to cart with-->
+<!-- Quantity addes as extra way to order            -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Joe's hotdogs</title>
+    <script>
+
+        const pricesArray = { 'hotdogs': 4.00, 'fries': 3.50, 'soda': 1.50, 'sauerkraut': 1.00 };
+
+        const menuJSON = '{"hotdogs": 4.00, "fries": 3.50, "soda": 1.50, "sauerkraut": 1.00}';
+
+        function MenuItem(name, price) {
+            this.name = name;
+            this.price = price;
+        }
+
+        const menuItems = [
+            new MenuItem('hotdogs', 4.00),
+            new MenuItem('fries', 3.50),
+            new MenuItem('soda', 1.50),
+            new MenuItem('sauerkraut', 1.00)
+        ];
+
+
+        function displayMenuFromJSON() {
+            const menuObj = JSON.parse(menuJSON);
+            const menuDiv = document.getElementById('menuJSON');
+            menuDiv.innerHTML = '<h2>Menu (JSON)</h2>';
+            for (const item in menuObj) {
+                menuDiv.innerHTML += `<p>${item}: $${menuObj[item]}</p>`;
+            }
+        }
+
+        function displayMenuFromObjects() {
+            const menuDiv = document.getElementById('menuObjects');
+            menuDiv.innerHTML = '<h2>Menu (Objects)</h2>';
+            menuItems.forEach(item => {
+                menuDiv.innerHTML += `<p>${item.name}: $${item.price}</p>`;
+            });
+        }
+
+        window.onload = function () {
+            displayMenuFromJSON();
+            displayMenuFromObjects();
+        };
+
+    </script>
+</head>
+
+<body>
+    <div id="menuJSON"></div>
+    <div id="menuObjects"></div>
+</body>
+
+
+</html>
