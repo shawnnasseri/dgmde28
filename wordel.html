@@ -1,0 +1,242 @@
+<!-- Author:  Shawn Nasseri                          -->
+<!-- Project: wordel game                            -->
+<!-- Date:    March 1, 2024                          -->
+<!-- Description                                     -->
+<!-- Wordel Game for DGMD E-28                       -->
+<!-- Using api to get a 5 letter word                -->
+<!-- Using second api to check word entered is valid -->
+<!-- Play the guesing game                           -->
+<!-- Color code for correct letters and positioning  -->
+<!-- Plus text showing letters: present, absent in   -->
+<!-- wrong place.                                    -->
+<!-- Win chime on correct guess using function from  -->
+<!-- my tic tac toe project                          -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Wordle Game Shawn's version</title>
+    <style>
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #ddd;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 2em;
+            text-transform: uppercase;
+            margin: 2px;
+        }
+
+        .correct {
+            background-color: lightgreen;
+            color: white;
+        }
+
+        .present {
+            background-color: lightyellow;
+            color: black;
+        }
+
+        .absent {
+            background-color: lightgrey;
+            color: white;
+        }
+
+        #grid div {
+            display: flex;
+
+        }
+
+        #grid .cell {
+            flex: 1;
+
+        }
+    </style>
+</head>
+
+<body>
+    <div id="gameContainer">
+        <div id="grid"></div>
+        <input type="text" id="guessInput" maxlength="5" />
+        <button id="submitGuess">Submit Guess</button>
+        <button id="newGameBtn">New Game</button>
+        <button id="debug">Debug Show Word</button>
+        <div id="letterList"></div>
+        <div>letters used: </div>
+        <div id="usedArrayHolder"></div>
+    </div>
+    <div id="stats"></div>
+    </div>
+
+    <script>
+        const apiURLWord = "https://random-word-api.herokuapp.com/word?number=1&length=5";
+        const winSound = new Audio("winChime.mp3"); // Creat an audio object for the win sound
+        let answer = '';
+        let guesses = [];
+        let usedArray = [];
+        let currentGuess = '';
+        let tries = 0;
+
+        async function initializeGame() {
+            var letters = document.getElementById('letterList');
+            letters.innerHTML = "";
+            try {
+                answer = await getNewWord();
+                console.log(answer); // see my word by sn 03/01/2024
+                guesses = [];
+                usedArray = [];
+                document.getElementById('usedArrayHolder').innerHTML = "";
+                tries = 0;
+                renderGrid();
+            } catch (error) {
+                console.error('Error initializing:', error);
+            }
+        }
+
+
+        async function getNewWord() {
+            try {
+                const response = await fetch(apiURLWord);
+                const [newWord] = await response.json();
+                return newWord.toUpperCase();
+            } catch (error) {
+                console.error('Failed to fetch a new five letter word:', error);
+            }
+        }
+
+
+        async function isValidWord5Letters(word) {
+            if (word.length !== 5) {
+                return false;
+            }
+
+            try {
+                const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                if (!response.ok) {
+                    throw new Error('Word not found');
+                }
+
+                const data = await response.json();
+                return data.length > 0;
+            } catch (error) {
+                console.error("Error checking word:", error);
+                return false;
+            }
+        }
+
+
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 6; i++) {
+                const row = document.createElement('div');
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.createElement('div');
+                    cell.textContent = guesses[i] ? guesses[i][j] : '';
+                    cell.classList.add('cell');
+                    row.appendChild(cell);
+                }
+                grid.appendChild(row);
+            }
+        }
+
+        function checkGuess() {
+            if (currentGuess.length < 5) {
+                alert('Guess must be 5 letters only.');
+                return;
+            }
+
+            if (tries >= 6) {
+                alert('No more guesses allowed. Start a new game.');
+                return;
+            }
+
+            usedArray.push(currentGuess);
+
+            guesses.push(currentGuess);
+            tries++;
+
+
+            var letters = document.getElementById('letterList');
+            letters.innerHTML = letters.innerHTML + "</br> Letters: "
+            const result = [];
+            for (let i = 0; i < currentGuess.length; i++) {
+                if (currentGuess[i] === answer[i]) {
+                    result.push({ letter: currentGuess[i], status: 'correct' });
+                    letters.innerHTML = letters.innerHTML + currentGuess[i] + " is in the right place ";
+                } else if (answer.includes(currentGuess[i])) {
+                    result.push({ letter: currentGuess[i], status: 'present' });
+                    letters.innerHTML = letters.innerHTML + currentGuess[i] + " is in the wrong place ";
+                } else {
+                    result.push({ letter: currentGuess[i], status: 'absent' });
+                    letters.innerHTML = letters.innerHTML + currentGuess[i] + " is not in the word ";
+                }
+            }
+
+            var usedArrayHolder = document.getElementById('usedArrayHolder');
+            usedArrayHolder.innerHTML = '';
+
+            usedArray.forEach(function (word) {
+                usedArrayHolder.innerHTML += word + "<br>";
+            });
+
+            displayResults(result);
+
+            if (currentGuess === answer) {
+                winSound.play();
+                setTimeout(() => {
+                    alert('you guessed the word!');
+                }, 500);
+
+            } else if (tries === 6) {
+                alert(`Out of guesses. The word was ${answer}.`);
+            }
+            currentGuess = '';
+        }
+
+        function displayResults(result) {
+            const rows = document.getElementById('grid').children;
+            const currentRow = rows[tries - 1];
+
+            if (currentRow && currentRow.children) {
+                const cells = currentRow.children;
+                result.forEach((res, index) => {
+                    if (cells[index]) {
+                        cells[index].textContent = res.letter;
+                        cells[index].classList.remove('correct', 'present', 'absent');
+                        cells[index].classList.add(res.status);
+                    }
+                });
+            }
+        }
+
+        document.getElementById('submitGuess').addEventListener('click', () => {
+            currentGuess = document.getElementById('guessInput').value.toUpperCase();
+
+            isValidWord5Letters(currentGuess).then(isValid => {
+                if (!isValid) {
+                    alert('Not a valid 5 letter word.');
+                    initializeGame();
+                }
+                // valid word go forward
+            });
+
+            checkGuess();
+            document.getElementById('guessInput').value = '';
+        });
+
+        document.getElementById('debug').addEventListener('click', () => {
+            alert('debug answer is: ' + answer);
+        });
+
+        document.getElementById('newGameBtn').addEventListener('click', initializeGame);
+
+        initializeGame();
+
+    </script>
+</body>
+
+</html>
