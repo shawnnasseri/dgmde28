@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Shawn Wordel React Version - 6</title>
+
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <style>
+    .wordRow {
+      display: flex;
+    }
+
+    .letter {
+      width: 100px;
+      height: 100px;
+      border: 1px solid #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+
+    .correct {
+      background-color: lightgreen;
+    }
+
+    .present {
+      background-color: yellow;
+    }
+
+    .absent {
+      background-color: lightblue;
+    }
+
+    .keyboard {
+      display: flex;
+      flex-wrap: wrap;
+      width: 800px;
+      margin-top: 20px;
+    }
+
+    .keyboard button {
+      width: 100px;
+      height: 100px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="shawnWordelApp6"></div>
+  <script>
+    const { useState, useEffect } = React;
+
+    function WordleBoard({ guesses, answer }) {
+      const createWordRow = (word, index) => {
+        const result = word.split('').map((letter, letterIndex) => {
+          let status = 'absent';
+          if (letter === answer[letterIndex]) {
+            status = 'correct';
+          } else if (answer.includes(letter)) {
+            status = 'present';
+          }
+
+          return React.createElement('div', { key: index + '-' + letterIndex, className: `letter ${status}` }, letter);
+        });
+
+        return React.createElement('div', { key: index, className: 'wordRow' }, result);
+      };
+
+      const board = guesses.map((word, index) => createWordRow(word, index));
+
+      return React.createElement('div', { className: 'wordleBoard' }, board);
+    }
+
+    function OnScreenKeyboard({ }) {
+      const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+      const keyboard = letters.map((letter, index) =>
+        React.createElement('button', { key: index }, letter)
+      );
+
+      return React.createElement('div', { className: 'keyboard' }, keyboard);
+    }
+
+    function App() {
+      const guesses = ['might', 'flood', 'stray'];
+      const answer = 'moody';
+
+      return React.createElement('div', { className: 'wordleApp' },
+        React.createElement(WordleBoard, { guesses: guesses, answer: answer }),
+        React.createElement(OnScreenKeyboard, {})
+      );
+    }
+
+    ReactDOM.render(React.createElement(App), document.getElementById('shawnWordelApp6'));
+  </script>
+</body>
+
+</html>
